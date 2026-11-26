@@ -1,0 +1,9 @@
+# data: raw Olist files are CC BY-NC-SA and large; sample is regenerated
+data/raw/
+data/sample/
+build/
+*.duckdb
+__pycache__/
+.pytest_cache/
+.ipynb_checkpoints/
+.DS_Store
