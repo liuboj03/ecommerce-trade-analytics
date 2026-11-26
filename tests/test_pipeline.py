@@ -25,4 +25,4 @@ def test_pipeline_on_sample(tmp_path):
     assert abs(dec["share_of_gmv_change"].sum() - 1) < 1e-9  # log decomposition adds up
 
     assert (tmp_path / "summary.md").exists()
-    assert (tmp_path / "figures" / "daily_gmv_alerts.png").exists()
+    assert (tmp_path / "figures" / "daily_gmv_alerts.svg").exists()

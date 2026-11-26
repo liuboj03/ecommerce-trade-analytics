@@ -19,9 +19,10 @@ TABLES = {
     "category_translation": "product_category_name_translation.csv",
 }
 
-# Olist volume is thin before 2017 and after Aug 2018, so monitoring uses a stable window
-ANALYSIS_START = "2017-01-01"
-ANALYSIS_END = "2018-08-31"
+# Olist has almost no orders before 2017-01-05, and the extract tails off after
+# 2018-08-21 (orders not yet captured), so monitoring uses the complete window only
+ANALYSIS_START = "2017-01-05"
+ANALYSIS_END = "2018-08-21"
 
 # Anomaly rule: compare each day with the previous ROLLING_DAYS days
 ROLLING_DAYS = 28

@@ -38,5 +38,5 @@ def build_layers(con: duckdb.DuckDBPyConnection) -> None:
 
 def row_counts(con: duckdb.DuckDBPyConnection) -> dict:
     tables = list(config.TABLES) + ["dwd_order", "dwd_order_item", "ads_daily_metrics",
-                                    "ads_category_month", "ads_review_repurchase"]
+                                    "ads_category_month", "ads_review_repurchase", "ads_delivery_review"]
     return {t: con.execute(f"SELECT COUNT(*) FROM {t}").fetchone()[0] for t in tables}

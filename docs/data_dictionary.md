@@ -9,7 +9,7 @@ data/raw/*.csv  ──►  原始表（orders, order_items, ...）
                      DWD 明细层：dwd_order（一单一行）、dwd_order_item（一件商品一行）
                        │  sql/03, 04, 05
                        ▼
-                     ADS 应用层：ads_daily_metrics、ads_category_month、ads_review_repurchase
+                     ADS 应用层：ads_daily_metrics、ads_category_month、ads_review_repurchase、ads_delivery_review
                        │  src/*.py
                        ▼
                      reports/：监控日报、预警清单、活动复盘、图表、导出给 Tableau 的 CSV
@@ -51,5 +51,6 @@ data/raw/*.csv  ──►  原始表（orders, order_items, ...）
 | ads_daily_metrics | 一天 | 日度监控：GMV、订单、用户、客单价、取消率、差评率、延迟率 |
 | ads_category_month | 月 × 品类 | 品类结构与占比变化 |
 | ads_review_repurchase | 首单评分 | 评价与复购的关系 |
+| ads_delivery_review | 是否延迟 | 送达时效与差评率 |
 
 各指标的计算口径见 [metric_definitions.md](metric_definitions.md)。

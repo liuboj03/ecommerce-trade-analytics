@@ -30,6 +30,7 @@ def run(data: str = "raw", report_dir: Path = config.REPORT_DIR, db_path: Path |
     daily = con.execute("SELECT * FROM ads_daily_metrics").df()
     cat_month = con.execute("SELECT * FROM ads_category_month").df()
     review_rep = con.execute("SELECT * FROM ads_review_repurchase").df()
+    delivery_rev = con.execute("SELECT * FROM ads_delivery_review").df()
 
     print("[3/6] Monitoring: anomaly detection and daily reports")
     anomalies = monitor.detect_anomalies(daily)
@@ -43,26 +44,27 @@ def run(data: str = "raw", report_dir: Path = config.REPORT_DIR, db_path: Path |
     daily.to_csv(tables_dir / "daily_metrics.csv", index=False)
     cat_month.to_csv(tables_dir / "category_month.csv", index=False)
     review_rep.to_csv(tables_dir / "review_repurchase.csv", index=False)
+    delivery_rev.to_csv(tables_dir / "delivery_review.csv", index=False)
     anomalies.to_csv(tables_dir / "anomalies.csv", index=False)
     camp["kpi"].to_csv(tables_dir / "campaign_kpi.csv")
     camp["decomposition"].to_csv(tables_dir / "campaign_decomposition.csv", index=False)
     camp["categories"].to_csv(tables_dir / "campaign_categories.csv", index=False)
 
     gmv_change = camp["kpi"].at["gmv", "change"]
-    charts.daily_gmv(daily, anomalies, fig_dir / "daily_gmv_alerts.png")
-    charts.category_share(cat_month, fig_dir / "category_share.png")
-    charts.review_repurchase(review_rep, fig_dir / "review_repurchase.png")
-    charts.campaign_decomposition(camp["decomposition"], gmv_change, fig_dir / "campaign_decomposition.png")
+    charts.daily_gmv(daily, anomalies, fig_dir / "daily_gmv_alerts.svg")
+    charts.category_share(cat_month, fig_dir / "category_share.svg")
+    charts.delivery_review(delivery_rev, fig_dir / "delivery_review.svg")
+    charts.campaign_decomposition(camp["decomposition"], gmv_change, fig_dir / "campaign_decomposition.svg")
 
     print("[6/6] Writing reports/summary.md")
-    summary = build_summary(data, counts, daily, anomalies, cat_month, review_rep, camp)
+    summary = build_summary(data, counts, daily, anomalies, cat_month, review_rep, delivery_rev, camp)
     (report_dir / "summary.md").write_text(summary, encoding="utf-8")
     con.close()
     print(f"Done. See {report_dir / 'summary.md'}")
     return {"counts": counts, "daily": daily, "anomalies": anomalies, "campaign": camp}
 
 
-def build_summary(data, counts, daily, anomalies, cat_month, review_rep, camp) -> str:
+def build_summary(data, counts, daily, anomalies, cat_month, review_rep, delivery_rev, camp) -> str:
     kpi, dec = camp["kpi"], camp["decomposition"]
     valid = daily[daily["orders"] > 0]
     top_cat = cat_month.groupby("category")["gmv"].sum().sort_values(ascending=False)
@@ -101,8 +103,12 @@ def build_summary(data, counts, daily, anomalies, cat_month, review_rep, camp) -
         "- Categories adding the most GMV: " + ", ".join(
             f"{r.category} (+{r.incremental_gmv:,.0f})" for r in cats.itertuples()),
         "",
-        "## Reviews and repurchase",
+        "## Delivery and reviews",
     ]
+    for r in delivery_rev.itertuples():
+        lines.append(f"- {r.delivery}: {r.orders:,} orders · avg score {r.avg_review_score:.2f} · "
+                     f"bad review rate {r.bad_review_rate:.1%}")
+    lines += ["", "## Reviews and repurchase"]
     for score in ["1", "2", "3", "4", "5"]:
         if score in rr.index:
             lines.append(f"- First order rated {score}: repurchase rate {rr[score]:.1%}")
